@@ -1,0 +1,167 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Design tokens. Palette is a blue-shifted void rather than a tinted near-black,
+   with sodium amber as the single loud accent, indigo as the structural accent,
+   and green reserved strictly for liveness semantics (never decoration).
+
+   Text tiers are pinned to measured contrast against --color-void, since almost
+   all copy on this page is small mono and therefore needs the 4.5:1 bar rather
+   than the 3:1 large-text one:
+     ink   16.8:1    primary
+     dim    7.8:1    secondary
+     faint  5.2:1    tertiary — still passes on the lightest surface (plate-hi)
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-void: #06080d;
+  --color-plate: #0e1014;
+  --color-plate-hi: #13161d;
+  --color-rule: #1e232c;
+  --color-rule-hi: #333b48;
+  --color-ink: #e9ebef;
+  --color-dim: #9aa2b0;
+  --color-faint: #7a8290;
+  --color-sodium: #ffb547;
+  --color-sodium-dim: #8a5f1f;
+  --color-indigo: #7c8cff;
+  --color-indigo-dim: #4c5590;
+  --color-live: #3fdca0;
+  --color-warn: #ff8a5c;
+
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+
+  --text-hero: clamp(2.75rem, 9vw, 7.5rem);
+  --text-hero--line-height: 0.9;
+  --text-hero--letter-spacing: -0.045em;
+  --text-slab: clamp(1.75rem, 4vw, 3rem);
+  --text-slab--line-height: 1;
+  --text-slab--letter-spacing: -0.03em;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    border-color: var(--color-rule);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: 'ss01', 'cv01';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-sodium);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-sodium);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-rule-hi);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-faint);
+  }
+}
+
+@layer utilities {
+  /* Dot field: reads as a schematic substrate, not as decoration. */
+  .field-dots {
+    background-image: radial-gradient(var(--color-rule-hi) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-position: -1px -1px;
+  }
+
+  .field-fade {
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 20%, transparent 78%);
+  }
+
+  .rule-t {
+    border-top: 1px solid var(--color-rule);
+  }
+
+  /* Tabular figures for anything that updates in place (clocks, counters). */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Travelling request marker on a diagram edge. Each edge declares
+     pathLength="100", so one dash geometry reads identically on a 90px hop and a
+     600px span. Driven by CSS rather than JS because there are up to 45 of them
+     looping at once, and because the reduced-motion block below then stops them
+     for free. */
+  .packet {
+    stroke-dasharray: 4 100;
+    stroke-dashoffset: 104;
+    animation: packet-travel 2.6s linear infinite;
+  }
+}
+
+@keyframes packet-travel {
+  from {
+    stroke-dashoffset: 104;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Shimmering text paints its glyphs with background-clip: text over a
+   transparent colour. Forced-colours modes drop background images, which would
+   leave the text invisible, so hand the glyphs their colour back. */
+@media (forced-colors: active) {
+  .shimmer {
+    background-image: none !important;
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
+  }
+}
+
+/* Global motion opt-out. Individual components also check useReducedMotion(),
+   this is the belt-and-braces layer for CSS transitions and marquees. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
