@@ -17,9 +17,12 @@ export function ScrollProgress({
   springOptions,
   containerRef,
 }: ScrollProgressProps): React.JSX.Element {
+  // No `layoutEffect: false` here. It is not in this version's ScrollOptions, and
+  // the default is the better behaviour anyway: measuring before paint means the
+  // bar is correct on first frame instead of one frame late. Motion already falls
+  // back to useEffect on the server, so the default costs no hydration warning.
   const { scrollYProgress } = useScroll({
     container: containerRef,
-    layoutEffect: false,
   });
 
   const scaleX = useSpring(scrollYProgress, {
