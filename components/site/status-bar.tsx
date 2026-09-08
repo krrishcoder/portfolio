@@ -73,9 +73,11 @@ export function StatusBar() {
   const time = useClock();
   const active = useActiveSection(NAV_IDS);
 
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-rule bg-void/85 backdrop-blur-md">
-      <div className="mx-auto flex h-12 max-w-6xl items-center gap-4 px-5 sm:px-8">
+      <div className="mx-auto flex h-12 max-w-6xl items-center gap-4 px-4 sm:px-8">
         <a
           href="#hero"
           className="flex shrink-0 items-center gap-2 font-mono text-xs text-ink"
@@ -101,9 +103,6 @@ export function StatusBar() {
                 key={item.id}
                 data-id={item.id}
                 href={`#${item.id}`}
-                // The moving highlight is the sighted cue for "you are here";
-                // aria-current is the only thing carrying that same fact into the
-                // accessibility tree.
                 aria-current={active === item.id ? 'true' : undefined}
                 className="px-2.5 py-1 font-mono text-[0.72rem] text-dim transition-colors duration-200 hover:text-ink data-[checked=true]:text-ink"
               >
@@ -116,11 +115,56 @@ export function StatusBar() {
         <div className="ml-auto flex shrink-0 items-center gap-3 font-mono text-[0.7rem] text-faint md:ml-0">
           <span className="hidden sm:inline">ap-south-1</span>
           <span aria-hidden="true" className="hidden h-3 w-px bg-rule sm:block" />
-          <span className="nums tabular-nums text-dim" suppressHydrationWarning>
+          <span className="nums tabular-nums text-dim hidden sm:inline" suppressHydrationWarning>
             {time || '--:--:--'} IST
           </span>
         </div>
+
+        <button
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-rule text-dim transition-colors hover:border-rule-hi hover:text-ink md:hidden"
+        >
+          {menuOpen ? (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <line x1="1" y1="1" x2="13" y2="13" />
+              <line x1="13" y1="1" x2="1" y2="13" />
+            </svg>
+          ) : (
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <line x1="0" y1="1" x2="14" y2="1" />
+              <line x1="0" y1="5" x2="14" y2="5" />
+              <line x1="0" y1="9" x2="14" y2="9" />
+            </svg>
+          )}
+        </button>
       </div>
+
+      {menuOpen && (
+        <nav
+          aria-label="Sections mobile"
+          className="border-t border-rule bg-void/95 px-4 py-3 md:hidden"
+        >
+          <ul className="flex flex-col gap-1">
+            {NAV.map((item) => (
+              <li key={item.id}>
+                <a
+                  href={`#${item.id}`}
+                  onClick={() => setMenuOpen(false)}
+                  aria-current={active === item.id ? 'true' : undefined}
+                  className="block py-2.5 font-mono text-[0.8rem] text-dim transition-colors hover:text-ink aria-[current=true]:text-sodium"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 border-t border-rule pt-3 font-mono text-[0.68rem] text-faint">
+            {time || '--:--:--'} IST · ap-south-1
+          </p>
+        </nav>
+      )}
 
       <ScrollProgress className="absolute inset-x-0 bottom-0 h-px bg-sodium" />
     </header>
